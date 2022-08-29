@@ -46,16 +46,18 @@ def plot_signal(result, title):
 def main():
     # number of video
     number = "4_3"
-    cap = cv2.VideoCapture("./kinect/id_" + number + ".mkv")
+    path_to_videos = "path/to/videos/"
+    cap = cv2.VideoCapture(path_to_videos + "id_" + number + ".mkv")
     signal1 = get_pos_of_joint_from_video(cap, 0)
-    cap = cv2.VideoCapture("./kinect/id_" + number + ".mkv")
+    cap = cv2.VideoCapture(path_to_videos + "id_" + number + ".mkv")
     signal2 = get_hand_landmark_from_video(cap)
+    fps = 15
 
     signals = [signal1, signal2]
-    timestamps = [1 / 30, 1 / 30]
+    timestamps = [1 / fps, 1 / fps]
     ini_pos = [signal1[0][0], signal1[0][1], signal1[0][2], 0, 0, 0]
     fuse_signal = FuseSignal(signals, timestamps)
-    filter = ParticleFilter(200, dt=1 / 30)
+    filter = ParticleFilter(200, dt=1 / fps, state_dim=3)
     fused_signal = fuse_signal.particle_filter(filter, ini_pos)
     title = "id_" + number + "hand"
     plot_signal(signal1, title)

@@ -187,10 +187,14 @@ class ConstantVelocityKalmanFilter(KalmanFilter):
                            [0, 0, 0, 0, 1, 0],
                            [0, 0, 0, 0, 0, 1]])
 
-        # Observation matrix (3x6) - positions are observed and not velocities
+        # Observation matrix (6x6) - positions are observed and not velocities
         self.H = np.array([[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-                           [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]])
+                           [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+                           [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                           [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+                           [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+                           ])
 
 
 class ConstantVelocityKalmanFilterWithControl(KalmanFilter):
