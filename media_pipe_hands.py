@@ -24,6 +24,8 @@ def get_signal_from_landmark(landmarks, joint_num):
 
 
 def get_pos_of_joint_from_video(cap, joint_num, coordinate_type="multi_hand_landmarks"):
+    cap = cv2.VideoCapture(cap)
+
     pos = []
 
     while True:
@@ -33,13 +35,31 @@ def get_pos_of_joint_from_video(cap, joint_num, coordinate_type="multi_hand_land
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image.flags.writeable = False
         results = hands.process(image)
-        image.flags.writeable = True
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        # image.flags.writeable = True
+        # image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         if results.multi_hand_landmarks:
             if coordinate_type == "multi_hand_landmarks":
                 pos.append(results.multi_hand_landmarks[0])
             elif coordinate_type == "multi_hand_world_landmarks":
                 pos.append(results.multi_hand_world_landmarks[0])
+
+        # Draw the hand annotations on the image.
+        image.flags.writeable = True
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                mp_drawing.draw_landmarks(
+                    image,
+                    hand_landmarks,
+                    mp_hands.HAND_CONNECTIONS,
+                    mp_drawing_styles.get_default_hand_landmarks_style(),
+                    mp_drawing_styles.get_default_hand_connections_style())
+
+        cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
+        if cv2.waitKey(5) & 0xFF == 27:
+            break
+    cap.release()
+
     return get_signal_from_landmark(pos, joint_num)
 
 

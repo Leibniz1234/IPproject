@@ -130,7 +130,7 @@ class KalmanFilterLogger:
             for K in kalman_gain_logger:
                 kx.append(K[0, 0])
                 ky.append(K[1, 0])
-                kz.append(K[2, 0])
+                # kz.append(K[2, 0])
 
             plt.figure("Kalman Gain")
             plt.cla()
@@ -144,17 +144,29 @@ class KalmanFilterLogger:
             plt.legend(loc="upper right")
         elif plot_type == "kalman_state":
             state_logger = self.state_logger[-win_len:]
-            sx, sy, sz = [], [], []
+            sx, sy, sdx, sdy = [], [], [], []
             for s in state_logger:
                 sx.append(s[0])
                 sy.append(s[1])
-                sz.append(s[2])
+                sdx.append(s[2])
+                sdy.append(s[3])
 
-            plt.figure("Kalman States")
+            plt.figure("Kalman States Pos")
             plt.cla()
             plt.plot(timesteps, sx, label="Kalman state x")
             plt.plot(timesteps, sy, label="Kalman state y")
-            plt.plot(timesteps, sz, label="Kalman state z")
+            # plt.plot(timesteps, sz, label="Kalman state z")
+
+            plt.title("Kalman States")
+            plt.xlabel("Time steps")
+            plt.ylabel("Kalman States")
+            plt.legend(loc="upper right")
+
+            plt.figure("Kalman States Vel")
+            plt.cla()
+            plt.plot(timesteps, sdx, label="Kalman state dx")
+            plt.plot(timesteps, sdy, label="Kalman state dy")
+            # plt.plot(timesteps, sz, label="Kalman state z")
 
             plt.title("Kalman States")
             plt.xlabel("Time steps")
@@ -176,29 +188,25 @@ class KalmanFilterLogger:
 
 
 class ConstantVelocityKalmanFilter(KalmanFilter):
-    def __init__(self, dt=0.01, state_dim=6, obs_dim=3, save_logs=True):
+    def __init__(self, dt=0.01, state_dim=4, obs_dim=2, save_logs=True):
         super().__init__(dt=dt, state_dim=state_dim, obs_dim=obs_dim, save_logs=save_logs)
 
         # State-transition matrix (6x6): x(t) = A * x(t-1) + w(t-1)
-        self.A = np.array([[1, 0, 0, self.dt, 0, 0],
-                           [0, 1, 0, 0, self.dt, 0],
-                           [0, 0, 1, 0, 0, self.dt],
-                           [0, 0, 0, 1, 0, 0],
-                           [0, 0, 0, 0, 1, 0],
-                           [0, 0, 0, 0, 0, 1]])
+        self.A = np.array([[1, 0, self.dt, 0],
+                           [0, 1, 0, self.dt],
+                           [0, 0, 1, 0],
+                           [0, 0, 0, 1]])
 
         # Observation matrix (6x6) - positions are observed and not velocities
-        self.H = np.array([[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                           [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-                           [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
-                           [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                           [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-                           [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+        self.H = np.array([[1.0, 0.0, 0.0, 0.0],
+                           [0.0, 1.0, 0.0, 0.0],
+                           [1.0, 0.0, 0.0, 0.0],
+                           [0.0, 1.0, 0.0, 0.0]
                            ])
 
 
 class ConstantVelocityKalmanFilterWithControl(KalmanFilter):
-    def __init__(self, dt=0.01, state_dim=6, obs_dim=3, control_dim=3, save_logs=True):
+    def __init__(self, dt=0.01, state_dim=4, obs_dim=2, control_dim=2, save_logs=True):
         super().__init__(dt, state_dim, obs_dim, control_dim, save_logs)
 
         # State-transition matrix (6x6): x(t) = A * x(t-1) + w(t-1)
